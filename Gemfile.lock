@@ -93,6 +93,7 @@ DEPENDENCIES
   capistrano (~> 3.4)
   capistrano-rails
   capistrano-rvm
+  concurrent-ruby
   i18n
   pg (~> 0.18.0)
   pry
@@ -104,4 +105,4 @@ DEPENDENCIES
   unicode
 
 BUNDLED WITH
-   1.12.3
+   1.13.2

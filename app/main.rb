@@ -11,6 +11,7 @@ require 'logger'
 require 'digest/sha1'
 require 'date'
 require 'redis'
+require 'concurrent'
 # require 'pry'
 
 require_relative 'main/configuration.rb'
