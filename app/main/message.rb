@@ -88,16 +88,14 @@ module Bot
     private
 
     def update_context
-      Bot::CONTEXT_MUTEX.synchronize do
-        context = Bot.redis.lrange(@chat_context_path, 0, 50)
+      context = Bot.redis.lrange(@chat_context_path, 0, 50)
 
-        Bot.redis.multi do |r|
-          uniq_words = @words.uniq
-          context -= uniq_words
-          context.unshift *uniq_words
-          r.del(@chat_context_path)
-          r.lpush(@chat_context_path, context.first(50))
-        end
+      Bot.redis.multi do |r|
+        uniq_words = @words.uniq
+        context -= uniq_words
+        context.unshift *uniq_words
+        r.del(@chat_context_path)
+        r.lpush(@chat_context_path, context.first(50))
       end
     end
 
@@ -106,8 +104,11 @@ module Bot
     end
 
     def process_message
-      Pair.learn self
-      update_context
+      Bot::MUTEX.synchronize do
+        Pair.learn(self)
+        update_context
+      end
+
       if has_anchors? || private? || reply_to_bot? || random_answer?
         reply = Pair.generate self
         answer reply if reply.present?
@@ -115,7 +116,7 @@ module Bot
     end
 
     def cool_story
-      context = Bot::CONTEXT_MUTEX.synchronize { Bot.redis.lrange(@chat_context_path, 0, 50) }
+      context = Bot.redis.lrange(@chat_context_path, 0, 50)
       reply = Pair.generate_story(self, context, 50)
       answer reply if reply.present?
     end

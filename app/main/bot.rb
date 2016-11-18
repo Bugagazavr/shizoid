@@ -1,5 +1,5 @@
 module Bot
-  CONTEXT_MUTEX = Mutex.new
+  MUTEX = Mutex.new
 
   def self.redis
     @redis ||= Redis.new(url: Bot.configuration.redis_url)
