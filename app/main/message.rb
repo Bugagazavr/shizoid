@@ -88,16 +88,15 @@ module Bot
     private
 
     def update_context
-      context = Bot.redis.get(@chat_context_path)
-      if context.present?
-        context = JSON.parse context
+      context = Bot.redis.lrange(@chat_context_path, 0, 50)
+
+      Bot.redis.multi do |r|
         uniq_words = @words.uniq
         context -= uniq_words
         context.unshift *uniq_words
-      else
-        context = @words.uniq
+        r.del(@chat_context_path)
+        r.lpush(@chat_context_path, context.first(50))
       end
-      Bot.redis.set(@chat_context_path, context.first(50)).to_json
     end
 
     def random_answer?
@@ -114,11 +113,9 @@ module Bot
     end
 
     def cool_story
-      context = Bot.redis.get(@chat_context_path)
-      if context.present?
-        reply = Pair.generate_story(self, JSON.parse(context), 50)
-        answer reply if reply.present?
-      end
+      context = Bot.redis.lrange(@chat_context_path, 0, 50)
+      reply = Pair.generate_story(self, context, 50)
+      answer reply if reply.present?
     end
 
     def set_gab
