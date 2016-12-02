@@ -110,7 +110,8 @@ module Bot
       end
 
       if has_anchors? || private? || reply_to_bot? || random_answer?
-        reply = Pair.generate self
+        context = Bot.redis.lrange(@chat_context_path, 0, rand(1..3)).shuffle
+        reply = Pair.generate(self, context)
         answer reply if reply.present?
       end
     end
