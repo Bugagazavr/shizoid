@@ -33,7 +33,7 @@ module Bot
       @chat_context_path = "chat_context/#{@chat.id}"
       @chat.migrate_to_chat_id @message.migrate_to_chat_id if @message.migrate_to_chat_id.present?
       if has_text?
-        Bot.logger.debug "[chat #{@chat.chat_type} #{@message.title}(#{@chat.telegram_id}) bare_text] #{@message.text}"
+        Bot.logger.debug "[chat #{@chat.chat_type} #{@message.chat.title}(#{@chat.telegram_id}) bare_text] #{@message.text}"
         @text = @message.text
         @words = get_words
         @command = get_command if @text.chars.first == '/'
