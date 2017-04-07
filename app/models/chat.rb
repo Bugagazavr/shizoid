@@ -34,7 +34,7 @@ class Chat < ActiveRecord::Base
   end
 
   def log_creation
-    Bot.logger.info "[chat #{self.chat_type} #{self.telegram_id}] Created with internal ID #{self.id}"
+    Bot.logger.info "[chat #{self.chat_type} #{self.title}(#{self.telegram_id})] Created with internal ID #{self.id}"
   end
 
 end
