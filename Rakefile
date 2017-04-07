@@ -1,3 +1,4 @@
+require 'zlib'
 require "rubygems"
 require "bundler/setup"
 
