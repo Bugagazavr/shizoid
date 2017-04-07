@@ -30,11 +30,11 @@ class Chat < ActiveRecord::Base
   private
 
   def log_new_gab
-    Bot.logger.info "[chat #{self.chat_type} #{self.title}(#{self.telegram_id})] New gab level is set to #{self.random_chance}"
+    Bot.logger.info "[chat #{self.chat_type} #{self.telegram_id}] New gab level is set to #{self.random_chance}"
   end
 
   def log_creation
-    Bot.logger.info "[chat #{self.chat_type} #{self.title}(#{self.telegram_id})] Created with internal ID #{self.id}"
+    Bot.logger.info "[chat #{self.chat_type} #{self.telegram_id}] Created with internal ID #{self.id}"
   end
 
 end
