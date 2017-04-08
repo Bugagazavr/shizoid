@@ -40,6 +40,14 @@ module Bot
       return unless has_text?
       return if is_editing?
 
+      Bot.report do
+        bot.track(
+          'Messages',
+          message.from.id,
+          message.as_json
+        )
+      end
+
       log_action('bare_text', message.text)
       return process_message unless is_command?
 
@@ -64,12 +72,28 @@ module Bot
 
     def answer(response_message)
       log_action('answer', response_message) do
+        Bot.report do
+          bot.track(
+            'Answers',
+            message.from.id,
+            text: response_message
+          )
+        end
+
         bot.api.send_message(chat_id: chat.telegram_id, text: response_message)
       end
     end
 
     def reply(response_message)
       log_action('reply', response_message) do
+        Bot.report do
+          bot.track(
+            'Replies',
+            message.from.id,
+            response_message: response_message
+          )
+        end
+
         bot.api.send_message(chat_id: chat.telegram_id, reply_to_message_id: message.message_id, text: response_message)
       end
     end
