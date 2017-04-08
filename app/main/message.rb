@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Bot
   class Message
     EIGHTBALL_ANSWERS = ['Бесспорно.',
@@ -39,8 +40,7 @@ module Bot
       return unless has_text?
       return if is_editing?
 
-      Bot.logger.debug "[chat #{chat.chat_type} #{chat_name}(#{chat.telegram_id}) bare_text] #{message.text}"
-
+      log_action('bare_text', message.text)
       return process_message unless is_command?
 
       send(command)
@@ -62,14 +62,16 @@ module Bot
       command.present?
     end
 
-    def answer(message)
-      Bot.logger.debug "[chat #{chat.chat_type} #{chat.telegram_id} answer] #{message}"
-      bot.api.send_message(chat_id: chat.telegram_id, text: message)
+    def answer(response_message)
+      log_action('answer', response_message) do
+        bot.api.send_message(chat_id: chat.telegram_id, text: response_message)
+      end
     end
 
     def reply(response_message)
-      Bot.logger.debug "[chat #{chat.chat_type} #{chat.telegram_id} reply] #{message}"
-      bot.api.send_message(chat_id: chat.telegram_id, reply_to_message_id: message.message_id, text: response_message)
+      log_action('reply', response_message) do
+        bot.api.send_message(chat_id: chat.telegram_id, reply_to_message_id: message.message_id, text: response_message)
+      end
     end
 
     def has_text?
@@ -97,6 +99,11 @@ module Bot
     end
 
     private
+
+    def log_action(context, data)
+      Bot.logger.debug "[chat #{chat.chat_type} #{chat_name}(#{chat.telegram_id}) #{context}] #{data}"
+      yield if block_given?
+    end
 
     def command
       @command ||= get_command if message.text.chars.first == '/'
@@ -173,8 +180,10 @@ module Bot
     def get_command
       command = message.text.split.first[1..-1].split('@').first
       return nil unless command.present?
-      Bot.logger.debug "[chat #{chat.chat_type} #{chat.telegram_id} get_command] #{command}"
-      command.to_sym if COMMANDS.include? command.to_sym
+
+      log_action('get_command', command) do
+        command.to_sym if COMMANDS.include? command.to_sym
+      end
     end
 
     def get_words
@@ -183,7 +192,7 @@ module Bot
       text = message.text.dup
       message.entities.each { |entity| text[entity.offset, entity.length] = ' ' * entity.length }
       result = message.text.split(' ').map{ |word| Unicode.downcase word }
-      Bot.logger.debug "[chat #{chat.chat_type} #{chat.telegram_id} get_words] #{result}"
+      log_action('get_words', result)
       result
     end
   end
