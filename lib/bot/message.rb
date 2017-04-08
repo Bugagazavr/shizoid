@@ -48,10 +48,14 @@ module Bot
         )
       end
 
-      log_action('bare_text', message.text)
+      log_action('bare_text', text)
       return process_message unless is_command?
 
       send(command)
+    end
+
+    def text
+      @text ||= message.text.dup
     end
 
     def words
@@ -99,7 +103,7 @@ module Bot
     end
 
     def has_text?
-      message.text.present?
+      text.present?
     end
 
     def is_editing?
@@ -116,7 +120,7 @@ module Bot
 
     def has_anchors?
       has_text? &&
-        (Bot.configuration.anchors & words).any? || (message.text.to_s.downcase.include?(Bot.configuration.bot_name.to_s.downcase))
+        (Bot.configuration.anchors & words).any? || (text.to_s.downcase.include?(Bot.configuration.bot_name.to_s.downcase))
     end
 
     def reply_to_bot?
@@ -131,7 +135,7 @@ module Bot
     end
 
     def command
-      @command ||= get_command if message.text.chars.first == '/'
+      @command ||= get_command if text.chars.first == '/'
     end
 
     def chat_context_path
@@ -178,7 +182,7 @@ module Bot
     end
 
     def set_gab
-      percent = message.text.split.second.to_i
+      percent = text.split.second.to_i
       return reply "0-50 allowed, Dude!" if percent < 0 || percent > 50
       chat.update(random_chance: percent)
       reply "Ya wohl, Lord Helmet! Setting gab to #{percent}"
@@ -197,13 +201,13 @@ module Bot
     end
 
     def eightball
-      digest = Digest::SHA1.hexdigest(message.text).to_i(16) - Date.today.to_time.to_i.div(100) - message.from.id
+      digest = Digest::SHA1.hexdigest(text).to_i(16) - Date.today.to_time.to_i.div(100) - message.from.id
       answer_id = digest.divmod(EIGHTBALL_ANSWERS.count)[1]
       reply "#{EIGHTBALL_ANSWERS[answer_id]} #{Pair.generate self}"
     end
 
     def get_command
-      command = message.text.split.first[1..-1].split('@').first
+      command = text.split.first[1..-1].split('@').first
       return nil unless command.present?
 
       log_action('get_command', command) do
@@ -212,11 +216,11 @@ module Bot
     end
 
     def get_words
-      return [] if message.text.nil?
+      return [] if text.nil?
 
-      text = message.text.dup
-      message.entities.each { |entity| text[entity.offset, entity.length] = ' ' * entity.length }
-      result = message.text.split(' ').map{ |word| Unicode.downcase word }
+      text_copy = text.dup
+      message.entities.each { |entity| text_copy[entity.offset, entity.length] = ' ' * entity.length }
+      result = text_copy.split(' ').map{ |word| Unicode.downcase word }
       log_action('get_words', result)
       result
     end
