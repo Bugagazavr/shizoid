@@ -11,7 +11,7 @@ module Bot
     def initialize
       Bot.logger.info 'Initializing bot'
       Dir.glob("#{Bot.configuration.root}/app/models/*.rb").each{|f| require f}
-      connection_details = YAML::load(File.open("#{Bot.configuration.root}/config/database.yml"))
+      connection_details = YAML.load(File.open("#{Bot.configuration.root}/config/database.yml"))
       ActiveRecord::Base.establish_connection(connection_details)
     end
 
@@ -21,14 +21,13 @@ module Bot
         bot.listen do |msg|
           Concurrent::Future.execute(executor: THREAD_POOL) do
             begin
-              Message.new(bot, msg).process
+              Message.new(bot, msg).()
             rescue Exception => error
-              Bot.logger.error "#{error}"
+              Bot.logger.error(error.to_s)
             end
           end
         end
       end
     end
-
   end
 end
