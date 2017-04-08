@@ -32,7 +32,7 @@ module Bot
       @chat = ::Chat.get_chat @message
       @chat_context_path = "chat_context/#{@chat.id}"
       @chat.migrate_to_chat_id @message.migrate_to_chat_id if @message.migrate_to_chat_id.present?
-      chat_name = @message.chat.name || @message.from.name
+      chat_name = @message.chat.title || @message.from.name
 
       @chat.update(name: chat_name) if @chat.name.to_s != chat_name.to_s
 
