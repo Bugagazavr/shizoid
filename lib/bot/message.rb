@@ -44,7 +44,7 @@ module Bot
         bot.track(
           'Messages',
           message.from.id,
-          message.as_json
+          chat_name: chat_name
         )
       end
 
@@ -76,7 +76,7 @@ module Bot
           bot.track(
             'Answers',
             message.from.id,
-            text: response_message
+            chat_name: chat_name
           )
         end
 
@@ -90,7 +90,7 @@ module Bot
           bot.track(
             'Replies',
             message.from.id,
-            response_message: response_message
+            chat_name: chat_name
           )
         end
 
@@ -115,11 +115,12 @@ module Bot
     end
 
     def has_anchors?
-      has_text? && (Bot.configuration.anchors & words).any? || (message.text.include? Bot.configuration.bot_name)
+      has_text? &&
+        (Bot.configuration.anchors & words).any? || (message.text.to_s.downcase.include?(Bot.configuration.bot_name.to_s.downcase))
     end
 
     def reply_to_bot?
-      message.reply_to_message&.from&.username == Bot.configuration.bot_name
+      message.reply_to_message&.from&.username.to_s.downcase == Bot.configuration.bot_name.to_s.downcase
     end
 
     private
