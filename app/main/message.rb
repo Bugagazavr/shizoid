@@ -32,8 +32,12 @@ module Bot
       @chat = ::Chat.get_chat @message
       @chat_context_path = "chat_context/#{@chat.id}"
       @chat.migrate_to_chat_id @message.migrate_to_chat_id if @message.migrate_to_chat_id.present?
+      chat_name = @message.chat.name || @message.from.name
+
+      @chat.update(name: chat_name) if @chat.name.to_s != chat_name.to_s
+
       if has_text?
-        Bot.logger.debug "[chat #{@chat.chat_type} #{@message.chat.title}(#{@chat.telegram_id}) bare_text] #{@message.text}"
+        Bot.logger.debug "[chat #{@chat.chat_type} #{chat_name}(#{@chat.telegram_id}) bare_text] #{@message.text}"
         @text = @message.text
         @words = get_words
         @command = get_command if @text.chars.first == '/'
