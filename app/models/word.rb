@@ -5,5 +5,4 @@ class Word < ActiveRecord::Base
     new_words = words - Word.where(word: words).pluck(:word)
     Word.create(new_words.uniq.map { |word| { word: word } })
   end
-
 end

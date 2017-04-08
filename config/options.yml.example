@@ -6,6 +6,7 @@ redis_url: 'redis://127.0.0.1:6380/13'
 punctuation:
   end_sentense: '.!?'
   all: '.!?,;:'
+botan_token: '11111111111'
 anchors:
   - shizoid_bot
   - шизик

@@ -1,13 +1,7 @@
 module Bot
-
-  def self.logger
-    @logger ||= Log.new Bot.configuration.debug_level
-  end
-
-  class Log
-
+  class Logger
     def initialize(debug_level)
-      @logger ||= Logger.new(STDERR)
+      @logger ||= ::Logger.new(STDERR)
       @logger.info 'Logger started'
       @debug_level = debug_level
     end
@@ -31,10 +25,8 @@ module Bot
     private
 
     def truncate(text)
-      if text
-        text.size > 250 ? "#{text[0..250]}…" : text
-      end
+      return unless text
+      text.size > 250 ? "#{text[0..250]}…" : text
     end
   end
-
 end
