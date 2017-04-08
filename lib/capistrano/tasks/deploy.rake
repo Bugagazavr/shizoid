@@ -7,20 +7,6 @@ namespace :deploy do
   end
 
   task :setup do
-    on roles(:app) do
-      symlinks = fetch(:symlinks)
-      linked_files = fetch :linked_files
-
-      symlinks.each do |symlink|
-        sudo "ln -nfs #{shared_path}/config/#{symlink[:source]} #{sub_strings(symlink[:link])}"
-      end
-
-      linked_files.each do |file|
-        upload! "#{file}.example", "#{shared_path}/#{file}"
-      end
-
-      sudo "systemctl enable #{fetch :application}.service"
-    end
   end
 
   task :generate_config_files do
