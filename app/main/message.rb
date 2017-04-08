@@ -46,6 +46,18 @@ module Bot
       send(command)
     end
 
+    def words
+      @words ||= has_text? && get_words
+    end
+
+    def chat_name
+      @chat_name ||= message.chat.title || message.from.username
+    end
+
+    def chat
+      @chat ||= chat_repository.find_or_create_chat(message)
+    end
+
     def is_command?
       command.present?
     end
@@ -55,9 +67,9 @@ module Bot
       bot.api.send_message(chat_id: chat.telegram_id, text: message)
     end
 
-    def reply(message)
+    def reply(response_message)
       Bot.logger.debug "[chat #{chat.chat_type} #{chat.telegram_id} reply] #{message}"
-      bot.api.send_message(chat_id: chat.telegram_id, reply_to_message_id: message.message_id, text: message)
+      bot.api.send_message(chat_id: chat.telegram_id, reply_to_message_id: message.message_id, text: response_message)
     end
 
     def has_text?
@@ -77,7 +89,7 @@ module Bot
     end
 
     def has_anchors?
-      has_text? && (Bot.configuration.anchors & words).any? || (text.include? Bot.configuration.bot_name)
+      has_text? && (Bot.configuration.anchors & words).any? || (message.text.include? Bot.configuration.bot_name)
     end
 
     def reply_to_bot?
@@ -86,24 +98,12 @@ module Bot
 
     private
 
-    def words
-      @words ||= get_words
-    end
-
     def command
-      @command ||= get_command if text.chars.first == '/'
+      @command ||= get_command if message.text.chars.first == '/'
     end
 
-    def text
-      @text ||= message.text
-    end
-
-    def context
+    def chat_context_path
       @chat_context_path ||= "chat_context/#{chat.id}"
-    end
-
-    def chat
-      chat_repository.find_or_create_by(message)
     end
 
     def chat_repository
@@ -146,7 +146,7 @@ module Bot
     end
 
     def set_gab
-      percent = text.split.second.to_i
+      percent = message.text.split.second.to_i
       return reply "0-50 allowed, Dude!" if percent < 0 || percent > 50
       chat.update(random_chance: percent)
       reply "Ya wohl, Lord Helmet! Setting gab to #{percent}"
@@ -165,22 +165,24 @@ module Bot
     end
 
     def eightball
-      digest = Digest::SHA1.hexdigest(text).to_i(16) - Date.today.to_time.to_i.div(100) - message.from.id
+      digest = Digest::SHA1.hexdigest(message.text).to_i(16) - Date.today.to_time.to_i.div(100) - message.from.id
       answer_id = digest.divmod(EIGHTBALL_ANSWERS.count)[1]
       reply "#{EIGHTBALL_ANSWERS[answer_id]} #{Pair.generate self}"
     end
 
     def get_command
-      command = text.split.first[1..-1].split('@').first
+      command = message.text.split.first[1..-1].split('@').first
       return nil unless command.present?
       Bot.logger.debug "[chat #{chat.chat_type} #{chat.telegram_id} get_command] #{command}"
       command.to_sym if COMMANDS.include? command.to_sym
     end
 
     def get_words
-      text = text.dup
+      return [] if message.text.nil?
+
+      text = message.text.dup
       message.entities.each { |entity| text[entity.offset, entity.length] = ' ' * entity.length }
-      result = text.split(' ').map{ |word| Unicode.downcase word }
+      result = message.text.split(' ').map{ |word| Unicode.downcase word }
       Bot.logger.debug "[chat #{chat.chat_type} #{chat.telegram_id} get_words] #{result}"
       result
     end

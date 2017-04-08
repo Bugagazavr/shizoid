@@ -14,6 +14,7 @@ require 'redis'
 require 'concurrent'
 # require 'pry'
 
+require_relative 'repositories/chat_repository'
 require_relative 'main/configuration.rb'
 require_relative 'main/message.rb'
 require_relative 'main/bot.rb'

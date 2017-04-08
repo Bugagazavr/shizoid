@@ -17,13 +17,15 @@ module Bot
 
     def run
       Bot.logger.info 'Starting bot'
+
       Telegram::Bot::Client.run Bot.configuration.telegram_token do |bot|
+        bot.options[:timeout] = 1
         bot.listen do |msg|
           Concurrent::Future.execute(executor: THREAD_POOL) do
             begin
               Message.new(bot, msg).()
             rescue Exception => error
-              Bot.logger.error(error.to_s)
+              Bot.logger.error("#{e.inspect}\n#{e.backtrace}")
             end
           end
         end

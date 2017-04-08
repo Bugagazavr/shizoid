@@ -13,6 +13,6 @@ class ChatRepository
         chat.type.to_sym
       end
 
-    Chat.find_or_create_by(telegram_id: telegram_id, chat_type: CHAT::CHAT_TYPES.index(type))
+    Chat.find_or_create_by(telegram_id: telegram_id, chat_type: Chat::CHAT_TYPES.index(type))
   end
 end
