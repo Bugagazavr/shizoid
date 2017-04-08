@@ -101,7 +101,7 @@ module Bot
     private
 
     def log_action(context, data)
-      Bot.logger.debug "[chat #{chat.chat_type} #{chat_name}(#{chat.telegram_id}) #{context}] #{data}"
+      Bot.logger.debug "[chat #{chat.chat_type_name} #{chat_name}(#{chat.telegram_id}) #{context}] #{data}"
       yield if block_given?
     end
 
