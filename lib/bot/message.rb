@@ -55,7 +55,7 @@ module Bot
     end
 
     def text
-      @text ||= message.text.dup
+      @text ||= has_text? && message.text.dup
     end
 
     def words
@@ -103,7 +103,7 @@ module Bot
     end
 
     def has_text?
-      text.present?
+      message.text.present?
     end
 
     def is_editing?
